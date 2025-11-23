@@ -5,11 +5,20 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Docker Best Practices</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class'
+        }
+    </script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
         body {
             font-family: 'Inter', sans-serif;
             background-color: #f5f5f4; /* stone-100 */
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+        .dark body {
+            background-color: #0c0a09; /* stone-950 */
         }
         .tab-active {
             border-color: #4f46e5; /* indigo-600 */
@@ -17,14 +26,26 @@
             color: #4f46e5;
             font-weight: 600;
         }
+        .dark .tab-active {
+            background-color: #1c1917; /* stone-900 */
+            color: #818cf8; /* indigo-400 */
+            border-color: #818cf8;
+        }
         .tab-inactive {
             border-color: transparent;
             color: #57534e; /* stone-600 */
             background-color: transparent;
         }
+        .dark .tab-inactive {
+            color: #a8a29e; /* stone-400 */
+        }
         .tab-inactive:hover {
             border-color: #d6d3d1; /* stone-300 */
             color: #292524; /* stone-800 */
+        }
+        .dark .tab-inactive:hover {
+            border-color: #57534e; /* stone-600 */
+            color: #e7e5e4; /* stone-200 */
         }
         .code-block {
             position: relative;
@@ -34,6 +55,10 @@
             padding: 1.25rem;
             overflow-x: auto;
             border: 1px solid #44403c;
+        }
+        .dark .code-block {
+            background-color: #0c0a09; /* stone-950 */
+            border-color: #292524; /* stone-800 */
         }
         .code-block pre {
             white-space: pre;
@@ -57,9 +82,16 @@
             transition: all 0.2s;
             opacity: 0.8;
         }
+        .dark .copy-btn {
+            background-color: #292524; /* stone-800 */
+            color: #d6d3d1; /* stone-300 */
+        }
         .copy-btn:hover {
             opacity: 1;
             background-color: #57534e; /* stone-600 */
+        }
+        .dark .copy-btn:hover {
+            background-color: #44403c; /* stone-700 */
         }
         .copy-btn-copied {
             background-color: #16a34a; /* green-600 */
@@ -80,20 +112,32 @@
             padding: 0 4px;
             border-radius: 4px;
         }
+        .dark .prose-strong {
+            color: #f5f5f4; /* stone-100 */
+            background-color: #374151; /* gray-700 */
+        }
     </style>
 </head>
-<body class="bg-stone-100 text-stone-800 antialiased selection:bg-indigo-100 selection:text-indigo-800">
+<body class="bg-stone-100 text-stone-800 dark:bg-stone-950 dark:text-stone-100 antialiased selection:bg-indigo-100 dark:selection:bg-indigo-900 selection:text-indigo-800 dark:selection:text-indigo-200">
 
-    <header class="sticky top-0 z-50 bg-white/90 backdrop-blur-sm border-b border-stone-200 shadow-sm">
+    <header class="sticky top-0 z-50 bg-white/90 dark:bg-stone-900/90 backdrop-blur-sm border-b border-stone-200 dark:border-stone-800 shadow-sm">
         <nav class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex justify-between items-center h-16">
                 <div class="flex-shrink-0 flex items-center gap-3">
                     <span class="text-3xl">🐳</span>
                     <div>
-                        <h1 class="text-xl font-bold text-stone-900 tracking-tight">Docker Best Practices</h1>
-                        <p class="text-xs text-stone-500 font-medium">Production-Ready Guide</p>
+                        <h1 class="text-xl font-bold text-stone-900 dark:text-stone-100 tracking-tight">Docker Best Practices</h1>
+                        <p class="text-xs text-stone-500 dark:text-stone-400 font-medium">Production-Ready Guide</p>
                     </div>
                 </div>
+                <button id="theme-toggle" class="p-2 rounded-lg text-stone-600 dark:text-stone-300 hover:bg-stone-100 dark:hover:bg-stone-800 transition-colors duration-200" aria-label="Toggle theme">
+                    <svg id="theme-icon-light" class="w-6 h-6 hidden dark:block" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"></path>
+                    </svg>
+                    <svg id="theme-icon-dark" class="w-6 h-6 block dark:hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path>
+                    </svg>
+                </button>
             </div>
         </nav>
     </header>
@@ -103,7 +147,7 @@
         <div class="mb-8">
             <div class="sm:hidden">
                 <label for="tabs-select" class="sr-only">Select a tab</label>
-                <select id="tabs-select" class="block w-full rounded-md border-stone-300 focus:border-indigo-500 focus:ring-indigo-500 py-3 text-base">
+                <select id="tabs-select" class="block w-full rounded-md border-stone-300 dark:border-stone-700 dark:bg-stone-800 dark:text-stone-100 focus:border-indigo-500 dark:focus:border-indigo-400 focus:ring-indigo-500 dark:focus:ring-indigo-400 py-3 text-base">
                     <option value="efficiency">Efficiency 🏗️</option>
                     <option value="security">Security 🛡️</option>
                     <option value="runtime">Runtime 🏃</option>
@@ -111,7 +155,7 @@
                 </select>
             </div>
             <div class="hidden sm:block">
-                <div class="border-b border-stone-200">
+                <div class="border-b border-stone-200 dark:border-stone-800">
                     <nav class="-mb-px flex space-x-8" aria-label="Tabs" role="tablist">
                         <button role="tab" aria-selected="true" aria-controls="panel-efficiency" id="tab-efficiency" class="tab-button tab-active whitespace-nowrap py-4 px-1 border-b-2 text-sm transition-colors duration-200">
                             Efficiency 🏗️
@@ -133,24 +177,24 @@
         <div>
             <div role="tabpanel" id="panel-efficiency" class="tab-panel space-y-8 animate-fade-in">
                 
-                <div class="bg-white p-8 rounded-xl shadow-sm border border-stone-200">
-                    <h2 class="text-2xl font-bold text-stone-900 mb-4 flex items-center gap-2">
-                        <span class="bg-indigo-100 text-indigo-700 p-2 rounded-lg text-xl">1</span> 
+                <div class="bg-white dark:bg-stone-900 p-8 rounded-xl shadow-sm border border-stone-200 dark:border-stone-800">
+                    <h2 class="text-2xl font-bold text-stone-900 dark:text-stone-100 mb-4 flex items-center gap-2">
+                        <span class="bg-indigo-100 dark:bg-indigo-900/50 text-indigo-700 dark:text-indigo-300 p-2 rounded-lg text-xl">1</span> 
                         Efficiency: Building Faster & Smaller
                     </h2>
-                    <p class="text-stone-600 mb-8 leading-relaxed">
+                    <p class="text-stone-600 dark:text-stone-300 mb-8 leading-relaxed">
                         Optimizing Docker images isn't just about disk space; it's about <span class="prose-strong">deployment speed</span> and <span class="prose-strong">attack surface reduction</span>.
                     </p>
 
-                    <h3 class="text-xl font-semibold text-stone-900 mt-8 mb-4">The Layer Cake Strategy</h3>
-                    <p class="text-stone-600 mb-6">
+                    <h3 class="text-xl font-semibold text-stone-900 dark:text-stone-100 mt-8 mb-4">The Layer Cake Strategy</h3>
+                    <p class="text-stone-600 dark:text-stone-300 mb-6">
                         Docker caches layers. If a layer changes, <span class="prose-strong">all subsequent layers must be rebuilt</span>. The key is to order your commands from <span class="prose-strong">least-frequently-changed</span> to <span class="prose-strong">most-frequently-changed</span>.
                     </p>
                     <div class="grid md:grid-cols-2 gap-6">
-                        <div class="rounded-lg border border-red-200 bg-red-50/50 p-6">
-                            <h4 class="text-sm font-bold text-red-800 uppercase tracking-wide mb-3">❌ Bad: The Slow Way</h4>
-                            <p class="text-red-800/80 text-sm mb-4">Copying source code first invalidates the cache every time you edit a single file, forcing <code class="bg-red-100 px-1 rounded">npm install</code> to re-run needlessly.</p>
-                            <div class="font-mono text-xs space-y-2 text-red-900 bg-white/50 p-3 rounded border border-red-100">
+                        <div class="rounded-lg border border-red-200 dark:border-red-900 bg-red-50/50 dark:bg-red-950/30 p-6">
+                            <h4 class="text-sm font-bold text-red-800 dark:text-red-300 uppercase tracking-wide mb-3">❌ Bad: The Slow Way</h4>
+                            <p class="text-red-800/80 dark:text-red-300/80 text-sm mb-4">Copying source code first invalidates the cache every time you edit a single file, forcing <code class="bg-red-100 dark:bg-red-900/50 px-1 rounded">npm install</code> to re-run needlessly.</p>
+                            <div class="font-mono text-xs space-y-2 text-red-900 dark:text-red-200 bg-white/50 dark:bg-stone-900/50 p-3 rounded border border-red-100 dark:border-red-900/50">
                                 <div><span class="font-bold">1.</span> COPY . .</div>
                                 <div><span class="font-bold">2.</span> RUN npm install</div>
                                 <div><span class="font-bold">3.</span> <span class="italic opacity-70">(Edit app.js)</span></div>
@@ -158,10 +202,10 @@
                                 <div><span class="font-bold">5.</span> 🐌 Re-run <span class="font-bold">1</span> & <span class="font-bold">2</span></div>
                             </div>
                         </div>
-                        <div class="rounded-lg border border-green-200 bg-green-50/50 p-6">
-                            <h4 class="text-sm font-bold text-green-800 uppercase tracking-wide mb-3">✅ Good: The Fast Way</h4>
-                            <p class="text-green-800/80 text-sm mb-4">Copying only <code class="bg-green-100 px-1 rounded">package.json</code> first ensures <code class="bg-green-100 px-1 rounded">npm install</code> only re-runs when your dependencies <em>actually</em> change.</p>
-                             <div class="font-mono text-xs space-y-2 text-green-900 bg-white/50 p-3 rounded border border-green-100">
+                        <div class="rounded-lg border border-green-200 dark:border-green-900 bg-green-50/50 dark:bg-green-950/30 p-6">
+                            <h4 class="text-sm font-bold text-green-800 dark:text-green-300 uppercase tracking-wide mb-3">✅ Good: The Fast Way</h4>
+                            <p class="text-green-800/80 dark:text-green-300/80 text-sm mb-4">Copying only <code class="bg-green-100 dark:bg-green-900/50 px-1 rounded">package.json</code> first ensures <code class="bg-green-100 dark:bg-green-900/50 px-1 rounded">npm install</code> only re-runs when your dependencies <em>actually</em> change.</p>
+                             <div class="font-mono text-xs space-y-2 text-green-900 dark:text-green-200 bg-white/50 dark:bg-stone-900/50 p-3 rounded border border-green-100 dark:border-green-900/50">
                                 <div><span class="font-bold">1.</span> COPY package*.json .</div>
                                 <div><span class="font-bold">2.</span> RUN npm install</div>
                                 <div><span class="font-bold">3.</span> COPY . .</div>
@@ -172,41 +216,41 @@
                         </div>
                     </div>
 
-                    <h3 class="text-xl font-semibold text-stone-900 mt-12 mb-4">Base Image Strategy</h3>
-                    <p class="text-stone-600 mb-6">
-                        Choosing the right starting point matters. Avoid generic tags like <code class="bg-stone-200 px-1 rounded text-sm">node:latest</code>. They are huge (1GB+) and change unexpectedly.
+                    <h3 class="text-xl font-semibold text-stone-900 dark:text-stone-100 mt-12 mb-4">Base Image Strategy</h3>
+                    <p class="text-stone-600 dark:text-stone-300 mb-6">
+                        Choosing the right starting point matters. Avoid generic tags like <code class="bg-stone-200 dark:bg-stone-700 px-1 rounded text-sm">node:latest</code>. They are huge (1GB+) and change unexpectedly.
                     </p>
-                    <div class="overflow-hidden rounded-lg border border-stone-200 mb-6">
-                        <table class="min-w-full divide-y divide-stone-200">
-                            <thead class="bg-stone-50">
+                    <div class="overflow-hidden rounded-lg border border-stone-200 dark:border-stone-800 mb-6">
+                        <table class="min-w-full divide-y divide-stone-200 dark:divide-stone-800">
+                            <thead class="bg-stone-50 dark:bg-stone-800">
                                 <tr>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-stone-500 uppercase tracking-wider">Image Tag</th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-stone-500 uppercase tracking-wider">Size (Approx)</th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-stone-500 uppercase tracking-wider">Use Case</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-stone-500 dark:text-stone-400 uppercase tracking-wider">Image Tag</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-stone-500 dark:text-stone-400 uppercase tracking-wider">Size (Approx)</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-stone-500 dark:text-stone-400 uppercase tracking-wider">Use Case</th>
                                 </tr>
                             </thead>
-                            <tbody class="bg-white divide-y divide-stone-200 text-sm">
+                            <tbody class="bg-white dark:bg-stone-900 divide-y divide-stone-200 dark:divide-stone-800 text-sm">
                                 <tr>
-                                    <td class="px-6 py-3 font-mono text-stone-700">node:latest</td>
+                                    <td class="px-6 py-3 font-mono text-stone-700 dark:text-stone-300">node:latest</td>
                                     <td class="px-6 py-3 text-red-600 font-bold">~1 GB</td>
                                     <td class="px-6 py-3">Dev only. Contains everything.</td>
                                 </tr>
                                 <tr>
-                                    <td class="px-6 py-3 font-mono text-stone-700">node:18-slim</td>
-                                    <td class="px-6 py-3 text-indigo-600 font-bold">~200 MB</td>
-                                    <td class="px-6 py-3">Production. Minimal OS packages.</td>
+                                    <td class="px-6 py-3 font-mono text-stone-700 dark:text-stone-300">node:18-slim</td>
+                                    <td class="px-6 py-3 text-indigo-600 dark:text-indigo-400 font-bold">~200 MB</td>
+                                    <td class="px-6 py-3 dark:text-stone-300">Production. Minimal OS packages.</td>
                                 </tr>
                                 <tr>
-                                    <td class="px-6 py-3 font-mono text-stone-700">node:18-alpine</td>
-                                    <td class="px-6 py-3 text-green-600 font-bold">~50 MB</td>
-                                    <td class="px-6 py-3">Extreme optimization (Warning: uses musl libc).</td>
+                                    <td class="px-6 py-3 font-mono text-stone-700 dark:text-stone-300">node:18-alpine</td>
+                                    <td class="px-6 py-3 text-green-600 dark:text-green-400 font-bold">~50 MB</td>
+                                    <td class="px-6 py-3 dark:text-stone-300">Extreme optimization (Warning: uses musl libc).</td>
                                 </tr>
                             </tbody>
                         </table>
                     </div>
 
-                    <h3 class="text-xl font-semibold text-stone-900 mt-12 mb-4">Multi-Stage Builds</h3>
-                    <p class="text-stone-600 mb-6">
+                    <h3 class="text-xl font-semibold text-stone-900 dark:text-stone-100 mt-12 mb-4">Multi-Stage Builds</h3>
+                    <p class="text-stone-600 dark:text-stone-300 mb-6">
                         Don't ship your build tools (compilers, git, dev dependencies) to production. Use a <span class="prose-strong">Builder</span> stage to create artifacts, and copy <span class="prose-strong">only</span> what you need to a clean, lightweight <span class="prose-strong">Runner</span> image.
                     </p>
                     <div class="code-block" data-lang="dockerfile">
@@ -240,9 +284,9 @@
 </pre>
                     </div>
 
-                    <h3 class="text-xl font-semibold text-stone-900 mt-12 mb-4">The `.dockerignore` File</h3>
-                    <p class="text-stone-600 mb-4">
-                        Always include a <code class="bg-stone-200 px-1 rounded text-sm">.dockerignore</code> file. This prevents local junk (like your <span class="prose-strong">node_modules</span> folder, <span class="prose-strong">.git</span> history, or <span class="prose-strong">.env</span> files) from being sent to the Docker daemon.
+                    <h3 class="text-xl font-semibold text-stone-900 dark:text-stone-100 mt-12 mb-4">The `.dockerignore` File</h3>
+                    <p class="text-stone-600 dark:text-stone-300 mb-4">
+                        Always include a <code class="bg-stone-200 dark:bg-stone-700 px-1 rounded text-sm">.dockerignore</code> file. This prevents local junk (like your <span class="prose-strong">node_modules</span> folder, <span class="prose-strong">.git</span> history, or <span class="prose-strong">.env</span> files) from being sent to the Docker daemon.
                     </p>
                     <div class="code-block" data-lang="text">
                         <button class="copy-btn">Copy</button>
@@ -259,61 +303,61 @@ Dockerfile
             </div>
 
             <div role="tabpanel" id="panel-security" class="tab-panel hidden space-y-8 animate-fade-in">
-                <div class="bg-white p-8 rounded-xl shadow-sm border border-stone-200">
-                    <h2 class="text-2xl font-bold text-stone-900 mb-4 flex items-center gap-2">
-                        <span class="bg-indigo-100 text-indigo-700 p-2 rounded-lg text-xl">2</span>
+                <div class="bg-white dark:bg-stone-900 p-8 rounded-xl shadow-sm border border-stone-200 dark:border-stone-800">
+                    <h2 class="text-2xl font-bold text-stone-900 dark:text-stone-100 mb-4 flex items-center gap-2">
+                        <span class="bg-indigo-100 dark:bg-indigo-900/50 text-indigo-700 dark:text-indigo-300 p-2 rounded-lg text-xl">2</span>
                         Security: Locking It Down
                     </h2>
-                    <p class="text-lg text-stone-600 mb-8 leading-relaxed">
+                    <p class="text-lg text-stone-600 dark:text-stone-300 mb-8 leading-relaxed">
                         By default, Docker containers run as <span class="prose-strong">root</span>. This is a major security risk. 
                     </p>
 
-                    <h3 class="text-xl font-semibold text-stone-900 mt-8 mb-4">The "Root" Problem & Solution</h3>
-                    <div class="rounded-lg bg-indigo-50 border border-indigo-200 p-6 mb-6">
+                    <h3 class="text-xl font-semibold text-stone-900 dark:text-stone-100 mt-8 mb-4">The "Root" Problem & Solution</h3>
+                    <div class="rounded-lg bg-indigo-50 dark:bg-indigo-950/30 border border-indigo-200 dark:border-indigo-900 p-6 mb-6">
                         <div class="flex items-start gap-4">
                             <div class="text-2xl">🛡️</div>
                             <div>
-                                <h4 class="text-lg font-semibold text-indigo-900 mb-1">The Golden Rule</h4>
-                                <p class="text-indigo-800 text-sm">
-                                    Always create a dedicated, non-root system user for your application and switch to it using the <code class="bg-white/50 px-1 rounded font-mono font-bold">USER</code> instruction in your Dockerfile.
+                                <h4 class="text-lg font-semibold text-indigo-900 dark:text-indigo-300 mb-1">The Golden Rule</h4>
+                                <p class="text-indigo-800 dark:text-indigo-300 text-sm">
+                                    Always create a dedicated, non-root system user for your application and switch to it using the <code class="bg-white/50 dark:bg-stone-900/50 px-1 rounded font-mono font-bold">USER</code> instruction in your Dockerfile.
                                 </p>
                             </div>
                         </div>
                     </div>
 
-                    <h3 class="text-xl font-semibold text-stone-900 mt-8 mb-4">The Port Rule & Mapping</h3>
-                    <p class="text-stone-600 mb-6">
+                    <h3 class="text-xl font-semibold text-stone-900 dark:text-stone-100 mt-8 mb-4">The Port Rule & Mapping</h3>
+                    <p class="text-stone-600 dark:text-stone-300 mb-6">
                         Non-root users cannot bind to "privileged" ports (any port below 1024). The standard practice is:
                     </p>
-                    <ul class="list-disc list-inside text-stone-600 space-y-2 mb-8 ml-2">
+                    <ul class="list-disc list-inside text-stone-600 dark:text-stone-300 space-y-2 mb-8 ml-2">
                         <li>Your application listens on a high port (e.g., <span class="prose-strong">3000</span>) <strong>inside</strong> the container.</li>
                         <li>Docker maps a privileged port (e.g., <span class="prose-strong">80</span>) on the <strong>outside</strong> (host) to your application's high port.</li>
                     </ul>
                     
-                    <div class="bg-stone-50 border border-stone-200 rounded-lg p-8 flex flex-col md:flex-row items-center justify-center space-y-6 md:space-y-0 md:space-x-4">
+                    <div class="bg-stone-50 dark:bg-stone-800 border border-stone-200 dark:border-stone-700 rounded-lg p-8 flex flex-col md:flex-row items-center justify-center space-y-6 md:space-y-0 md:space-x-4">
                         <div class="text-center w-full md:w-auto">
-                            <div class="text-sm font-bold text-stone-500 mb-1">INTERNET</div>
-                            <div class="bg-white border border-stone-300 p-3 rounded shadow-sm">
-                                <div class="font-bold">User Request</div>
-                                <div class="font-mono text-xs text-indigo-600 mt-1">Target: Port 80</div>
+                            <div class="text-sm font-bold text-stone-500 dark:text-stone-400 mb-1">INTERNET</div>
+                            <div class="bg-white dark:bg-stone-900 border border-stone-300 dark:border-stone-700 p-3 rounded shadow-sm">
+                                <div class="font-bold dark:text-stone-100">User Request</div>
+                                <div class="font-mono text-xs text-indigo-600 dark:text-indigo-400 mt-1">Target: Port 80</div>
                             </div>
                         </div>
-                        <div class="text-2xl text-stone-300 rotate-90 md:rotate-0">➔</div>
+                        <div class="text-2xl text-stone-300 dark:text-stone-700 rotate-90 md:rotate-0">➔</div>
                         <div class="text-center w-full md:w-auto relative group">
-                            <div class="absolute -top-6 left-0 w-full text-center text-xs font-bold text-stone-400">HOST MACHINE</div>
-                            <div class="bg-stone-800 text-white p-4 rounded-lg shadow-lg border-2 border-stone-600">
+                            <div class="absolute -top-6 left-0 w-full text-center text-xs font-bold text-stone-400 dark:text-stone-500">HOST MACHINE</div>
+                            <div class="bg-stone-800 dark:bg-stone-700 text-white dark:text-stone-100 p-4 rounded-lg shadow-lg border-2 border-stone-600 dark:border-stone-600">
                                 <div class="font-bold">Docker Daemon</div>
-                                <div class="font-mono text-xs text-stone-300 mt-2 p-1 bg-stone-900 rounded">
+                                <div class="font-mono text-xs text-stone-300 dark:text-stone-200 mt-2 p-1 bg-stone-900 dark:bg-stone-800 rounded">
                                     -p 80:3000
                                 </div>
                             </div>
                         </div>
-                        <div class="text-2xl text-stone-300 rotate-90 md:rotate-0">➔</div>
+                        <div class="text-2xl text-stone-300 dark:text-stone-700 rotate-90 md:rotate-0">➔</div>
                         <div class="text-center w-full md:w-auto relative">
-                             <div class="absolute -top-6 left-0 w-full text-center text-xs font-bold text-indigo-400">CONTAINER</div>
-                            <div class="bg-indigo-50 border-2 border-indigo-200 p-4 rounded-lg shadow-sm">
-                                <div class="font-bold text-indigo-900">Node App</div>
-                                <div class="font-mono text-xs text-indigo-700 mt-2">
+                             <div class="absolute -top-6 left-0 w-full text-center text-xs font-bold text-indigo-400 dark:text-indigo-500">CONTAINER</div>
+                            <div class="bg-indigo-50 dark:bg-indigo-950/30 border-2 border-indigo-200 dark:border-indigo-900 p-4 rounded-lg shadow-sm">
+                                <div class="font-bold text-indigo-900 dark:text-indigo-300">Node App</div>
+                                <div class="font-mono text-xs text-indigo-700 dark:text-indigo-300 mt-2">
                                     USER: appuser<br>
                                     PORT: 3000
                                 </div>
@@ -322,7 +366,7 @@ Dockerfile
                     </div>
 
 
-                    <h3 class="text-xl font-semibold text-stone-900 mt-12 mb-4">Secure Dockerfile Snippet</h3>
+                    <h3 class="text-xl font-semibold text-stone-900 dark:text-stone-100 mt-12 mb-4">Secure Dockerfile Snippet</h3>
                     <div class="code-block" data-lang="dockerfile">
                         <button class="copy-btn">Copy</button>
 <pre>
@@ -347,16 +391,16 @@ Dockerfile
 </pre>
                     </div>
 
-                    <h3 class="text-xl font-semibold text-stone-900 mt-12 mb-4">Secrets: The Anti-Pattern</h3>
-                    <div class="rounded-lg border-l-4 border-yellow-400 bg-yellow-50 p-6">
-                        <h4 class="text-lg font-bold text-yellow-800 mb-2">⚠️ Never bake secrets into the image</h4>
-                        <p class="text-yellow-800/80 mb-4">
+                    <h3 class="text-xl font-semibold text-stone-900 dark:text-stone-100 mt-12 mb-4">Secrets: The Anti-Pattern</h3>
+                    <div class="rounded-lg border-l-4 border-yellow-400 dark:border-yellow-600 bg-yellow-50 dark:bg-yellow-950/30 p-6">
+                        <h4 class="text-lg font-bold text-yellow-800 dark:text-yellow-300 mb-2">⚠️ Never bake secrets into the image</h4>
+                        <p class="text-yellow-800/80 dark:text-yellow-300/80 mb-4">
                             Do <strong>NOT</strong> put <code>ENV API_KEY=12345</code> in your Dockerfile. Anyone who pulls the image can see it.
                         </p>
-                        <p class="text-sm font-medium text-yellow-900">
+                        <p class="text-sm font-medium text-yellow-900 dark:text-yellow-300">
                             Instead, inject them at runtime:
                         </p>
-                        <code class="block mt-2 bg-yellow-100 p-2 rounded text-yellow-900 font-mono text-sm">
+                        <code class="block mt-2 bg-yellow-100 dark:bg-yellow-900/50 p-2 rounded text-yellow-900 dark:text-yellow-200 font-mono text-sm">
                             docker run --env-file .env my-app
                         </code>
                     </div>
@@ -364,44 +408,44 @@ Dockerfile
             </div>
 
             <div role="tabpanel" id="panel-runtime" class="tab-panel hidden space-y-8 animate-fade-in">
-                <div class="bg-white p-8 rounded-xl shadow-sm border border-stone-200">
-                    <h2 class="text-2xl font-bold text-stone-900 mb-4 flex items-center gap-2">
-                        <span class="bg-indigo-100 text-indigo-700 p-2 rounded-lg text-xl">3</span>
+                <div class="bg-white dark:bg-stone-900 p-8 rounded-xl shadow-sm border border-stone-200 dark:border-stone-800">
+                    <h2 class="text-2xl font-bold text-stone-900 dark:text-stone-100 mb-4 flex items-center gap-2">
+                        <span class="bg-indigo-100 dark:bg-indigo-900/50 text-indigo-700 dark:text-indigo-300 p-2 rounded-lg text-xl">3</span>
                         Runtime: Philosophy & Orchestration
                     </h2>
                     
-                    <h3 class="text-xl font-semibold text-stone-900 mt-8 mb-4">"One Process Per Container"</h3>
-                    <p class="text-stone-600 mb-6">
+                    <h3 class="text-xl font-semibold text-stone-900 dark:text-stone-100 mt-8 mb-4">"One Process Per Container"</h3>
+                    <p class="text-stone-600 dark:text-stone-300 mb-6">
                         Never bundle your Database and API in the same container. Why? If the API process crashes but the Database process keeps running, Docker will think the container is still healthy.
                     </p>
                     <div class="grid md:grid-cols-2 gap-6">
-                        <div class="rounded-lg border border-stone-200 bg-stone-50 p-6">
-                            <h4 class="text-sm font-bold text-stone-500 uppercase mb-2">Monolithic Container</h4>
-                            <div class="text-xs text-stone-500 mb-4">Hard to scale, hard to debug, breaks self-healing.</div>
-                            <div class="border border-stone-300 rounded p-4 text-center bg-white">
-                                <span class="font-bold text-stone-800">Container</span>
-                                <div class="mt-2 p-1 bg-red-100 text-red-800 rounded text-xs">API (Crashed)</div>
-                                <div class="mt-1 p-1 bg-green-100 text-green-800 rounded text-xs">DB (Running)</div>
+                        <div class="rounded-lg border border-stone-200 dark:border-stone-800 bg-stone-50 dark:bg-stone-800 p-6">
+                            <h4 class="text-sm font-bold text-stone-500 dark:text-stone-400 uppercase mb-2">Monolithic Container</h4>
+                            <div class="text-xs text-stone-500 dark:text-stone-400 mb-4">Hard to scale, hard to debug, breaks self-healing.</div>
+                            <div class="border border-stone-300 dark:border-stone-700 rounded p-4 text-center bg-white dark:bg-stone-900">
+                                <span class="font-bold text-stone-800 dark:text-stone-200">Container</span>
+                                <div class="mt-2 p-1 bg-red-100 dark:bg-red-900/50 text-red-800 dark:text-red-300 rounded text-xs">API (Crashed)</div>
+                                <div class="mt-1 p-1 bg-green-100 dark:bg-green-900/50 text-green-800 dark:text-green-300 rounded text-xs">DB (Running)</div>
                             </div>
                         </div>
-                        <div class="rounded-lg border border-indigo-200 bg-indigo-50 p-6">
-                            <h4 class="text-sm font-bold text-indigo-700 uppercase mb-2">Decoupled Containers</h4>
-                            <p class="text-xs text-indigo-600 mb-4">If the API crashes, Docker restarts just that container.</p>
+                        <div class="rounded-lg border border-indigo-200 dark:border-indigo-900 bg-indigo-50 dark:bg-indigo-950/30 p-6">
+                            <h4 class="text-sm font-bold text-indigo-700 dark:text-indigo-300 uppercase mb-2">Decoupled Containers</h4>
+                            <p class="text-xs text-indigo-600 dark:text-indigo-300 mb-4">If the API crashes, Docker restarts just that container.</p>
                              <div class="flex gap-4 text-center">
-                                 <div class="flex-1 border border-indigo-300 bg-white rounded p-3 shadow-sm">
-                                     <span class="font-bold text-indigo-900 text-xs">App</span>
-                                     <div class="mt-2 p-1 bg-red-100 text-red-800 rounded text-xs">Restarting...</div>
+                                 <div class="flex-1 border border-indigo-300 dark:border-indigo-800 bg-white dark:bg-stone-900 rounded p-3 shadow-sm">
+                                     <span class="font-bold text-indigo-900 dark:text-indigo-300 text-xs">App</span>
+                                     <div class="mt-2 p-1 bg-red-100 dark:bg-red-900/50 text-red-800 dark:text-red-300 rounded text-xs">Restarting...</div>
                                  </div>
-                                 <div class="flex-1 border border-indigo-300 bg-white rounded p-3 shadow-sm">
-                                     <span class="font-bold text-indigo-900 text-xs">DB</span>
-                                     <div class="mt-2 p-1 bg-green-100 text-green-800 rounded text-xs">Running</div>
+                                 <div class="flex-1 border border-indigo-300 dark:border-indigo-800 bg-white dark:bg-stone-900 rounded p-3 shadow-sm">
+                                     <span class="font-bold text-indigo-900 dark:text-indigo-300 text-xs">DB</span>
+                                     <div class="mt-2 p-1 bg-green-100 dark:bg-green-900/50 text-green-800 dark:text-green-300 rounded text-xs">Running</div>
                                  </div>
                              </div>
                         </div>
                     </div>
 
-                    <h3 class="text-xl font-semibold text-stone-900 mt-12 mb-4">Healthchecks (Self-Healing)</h3>
-                    <p class="text-stone-600 mb-6">
+                    <h3 class="text-xl font-semibold text-stone-900 dark:text-stone-100 mt-12 mb-4">Healthchecks (Self-Healing)</h3>
+                    <p class="text-stone-600 dark:text-stone-300 mb-6">
                         Docker needs to know if your app is <span class="prose-strong">ready</span> to receive traffic. A process can be "running" (PID exists) but "deadlocked" (stuck). Add a healthcheck:
                     </p>
                     <div class="code-block" data-lang="yaml">
@@ -415,9 +459,9 @@ Dockerfile
 </pre>
                     </div>
 
-                    <h3 class="text-xl font-semibold text-stone-900 mt-12 mb-4">Resource Limits (Production Critical)</h3>
-                    <p class="text-stone-600 mb-6">
-                        Without limits, one memory-leaking container can crash your entire server. Always set limits in your <code class="bg-stone-200 px-1 rounded text-sm">docker-compose.yml</code>.
+                    <h3 class="text-xl font-semibold text-stone-900 dark:text-stone-100 mt-12 mb-4">Resource Limits (Production Critical)</h3>
+                    <p class="text-stone-600 dark:text-stone-300 mb-6">
+                        Without limits, one memory-leaking container can crash your entire server. Always set limits in your <code class="bg-stone-200 dark:bg-stone-700 px-1 rounded text-sm">docker-compose.yml</code>.
                     </p>
                     <div class="code-block" data-lang="yaml">
                         <button class="copy-btn">Copy</button>
@@ -449,48 +493,48 @@ Dockerfile
             </div>
 
             <div role="tabpanel" id="panel-cheat-sheet" class="tab-panel hidden space-y-8 animate-fade-in">
-                <div class="bg-white p-8 rounded-xl shadow-sm border border-stone-200">
-                    <h2 class="text-2xl font-bold text-stone-900 mb-6">⚡️ Cheat Sheet</h2>
-                    <p class="text-stone-600 mb-8">
+                <div class="bg-white dark:bg-stone-900 p-8 rounded-xl shadow-sm border border-stone-200 dark:border-stone-800">
+                    <h2 class="text-2xl font-bold text-stone-900 dark:text-stone-100 mb-6">⚡️ Cheat Sheet</h2>
+                    <p class="text-stone-600 dark:text-stone-300 mb-8">
                         Quick reference for the commands used in this guide.
                     </p>
                     
-                    <div class="overflow-hidden border border-stone-200 rounded-lg">
-                        <table class="min-w-full divide-y divide-stone-200">
-                            <thead class="bg-stone-50">
+                    <div class="overflow-hidden border border-stone-200 dark:border-stone-800 rounded-lg">
+                        <table class="min-w-full divide-y divide-stone-200 dark:divide-stone-800">
+                            <thead class="bg-stone-50 dark:bg-stone-800">
                                 <tr>
-                                    <th scope="col" class="px-6 py-3 text-left text-xs font-bold text-stone-500 uppercase tracking-wider">Action</th>
-                                    <th scope="col" class="px-6 py-3 text-left text-xs font-bold text-stone-500 uppercase tracking-wider">Command</th>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-bold text-stone-500 dark:text-stone-400 uppercase tracking-wider">Action</th>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-bold text-stone-500 dark:text-stone-400 uppercase tracking-wider">Command</th>
                                 </tr>
                             </thead>
-                            <tbody class="bg-white divide-y divide-stone-200 text-sm">
-                                <tr class="hover:bg-stone-50 transition-colors">
-                                    <td class="px-6 py-4 font-medium text-stone-900">Build Image</td>
-                                    <td class="px-6 py-4 text-stone-600 font-mono">docker build -t my-app .</td>
+                            <tbody class="bg-white dark:bg-stone-900 divide-y divide-stone-200 dark:divide-stone-800 text-sm">
+                                <tr class="hover:bg-stone-50 dark:hover:bg-stone-800 transition-colors">
+                                    <td class="px-6 py-4 font-medium text-stone-900 dark:text-stone-100">Build Image</td>
+                                    <td class="px-6 py-4 text-stone-600 dark:text-stone-300 font-mono">docker build -t my-app .</td>
                                 </tr>
-                                <tr class="hover:bg-stone-50 transition-colors">
-                                    <td class="px-6 py-4 font-medium text-stone-900">Run (Secure Port)</td>
-                                    <td class="px-6 py-4 text-stone-600 font-mono">docker run -p 80:3000 my-app</td>
+                                <tr class="hover:bg-stone-50 dark:hover:bg-stone-800 transition-colors">
+                                    <td class="px-6 py-4 font-medium text-stone-900 dark:text-stone-100">Run (Secure Port)</td>
+                                    <td class="px-6 py-4 text-stone-600 dark:text-stone-300 font-mono">docker run -p 80:3000 my-app</td>
                                 </tr>
-                                <tr class="hover:bg-stone-50 transition-colors">
-                                    <td class="px-6 py-4 font-medium text-stone-900">Run (With Env File)</td>
-                                    <td class="px-6 py-4 text-stone-600 font-mono">docker run --env-file .env my-app</td>
+                                <tr class="hover:bg-stone-50 dark:hover:bg-stone-800 transition-colors">
+                                    <td class="px-6 py-4 font-medium text-stone-900 dark:text-stone-100">Run (With Env File)</td>
+                                    <td class="px-6 py-4 text-stone-600 dark:text-stone-300 font-mono">docker run --env-file .env my-app</td>
                                 </tr>
-                                <tr class="hover:bg-stone-50 transition-colors">
-                                    <td class="px-6 py-4 font-medium text-stone-900">Compose Start (Detach)</td>
-                                    <td class="px-6 py-4 text-stone-600 font-mono">docker compose up -d</td>
+                                <tr class="hover:bg-stone-50 dark:hover:bg-stone-800 transition-colors">
+                                    <td class="px-6 py-4 font-medium text-stone-900 dark:text-stone-100">Compose Start (Detach)</td>
+                                    <td class="px-6 py-4 text-stone-600 dark:text-stone-300 font-mono">docker compose up -d</td>
                                 </tr>
-                                <tr class="hover:bg-stone-50 transition-colors">
-                                    <td class="px-6 py-4 font-medium text-stone-900">Compose Logs</td>
-                                    <td class="px-6 py-4 text-stone-600 font-mono">docker compose logs -f</td>
+                                <tr class="hover:bg-stone-50 dark:hover:bg-stone-800 transition-colors">
+                                    <td class="px-6 py-4 font-medium text-stone-900 dark:text-stone-100">Compose Logs</td>
+                                    <td class="px-6 py-4 text-stone-600 dark:text-stone-300 font-mono">docker compose logs -f</td>
                                 </tr>
-                                <tr class="hover:bg-stone-50 transition-colors">
-                                    <td class="px-6 py-4 font-medium text-stone-900">Check Resource Usage</td>
-                                    <td class="px-6 py-4 text-stone-600 font-mono">docker stats</td>
+                                <tr class="hover:bg-stone-50 dark:hover:bg-stone-800 transition-colors">
+                                    <td class="px-6 py-4 font-medium text-stone-900 dark:text-stone-100">Check Resource Usage</td>
+                                    <td class="px-6 py-4 text-stone-600 dark:text-stone-300 font-mono">docker stats</td>
                                 </tr>
-                                <tr class="hover:bg-stone-50 transition-colors">
-                                    <td class="px-6 py-4 font-medium text-stone-900">Clean up Unused</td>
-                                    <td class="px-6 py-4 text-stone-600 font-mono">docker system prune -a</td>
+                                <tr class="hover:bg-stone-50 dark:hover:bg-stone-800 transition-colors">
+                                    <td class="px-6 py-4 font-medium text-stone-900 dark:text-stone-100">Clean up Unused</td>
+                                    <td class="px-6 py-4 text-stone-600 dark:text-stone-300 font-mono">docker system prune -a</td>
                                 </tr>
                             </tbody>
                         </table>
@@ -559,6 +603,22 @@ Dockerfile
                     }
                     document.body.removeChild(textArea);
                 });
+            });
+
+            // Theme toggle functionality
+            const themeToggle = document.getElementById('theme-toggle');
+            const html = document.documentElement;
+            
+            // Check for saved theme preference or default to light mode
+            const savedTheme = localStorage.getItem('theme') || 'light';
+            if (savedTheme === 'dark') {
+                html.classList.add('dark');
+            }
+
+            themeToggle.addEventListener('click', () => {
+                html.classList.toggle('dark');
+                const isDark = html.classList.contains('dark');
+                localStorage.setItem('theme', isDark ? 'dark' : 'light');
             });
         });
     </script>
