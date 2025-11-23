@@ -1,0 +1,479 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interactive Docker Best Practices</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- 
+    Chosen Palette: Warm Neutrals (Tailwind Stone) with Indigo Accent
+    Application Structure Plan: A single-page app (SPA) using a tabbed interface. This IA pattern breaks the 3 pillars of the report (Efficiency, Security, Runtime) + a Cheat Sheet into distinct, manageable sections. This is more usable than a long scrolling page as it allows for both linear learning and direct access to specific topics. Interaction is handled by JS tab-switching logic.
+    Visualization & Content Choices: Report Info: Layer Caching -> Goal: Compare -> Viz: HTML/Tailwind diagram (Good vs. Bad) -> Interaction: N/A -> Justification: Clear visual comparison. | Report Info: Port Rule -> Goal: Organize/Inform -> Viz: HTML/Tailwind diagram (Port Mapping) -> Interaction: N/A -> Justification: Explains the abstract concept visually. | Report Info: One Process Rule -> Goal: Compare -> Viz: HTML/Tailwind diagram (Monolith vs. Microservice) -> Interaction: N/A -> Justification: Clearly shows the two architectures. | Report Info: Code Snippets -> Goal: Inform/Provide -> Viz: HTML <pre> blocks -> Interaction: "Copy to Clipboard" button (JS) -> Justification: Essential utility for a developer audience.
+    CONFIRMATION: NO SVG graphics used. NO Mermaid JS used.
+    -->
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f5f5f4; /* stone-100 */
+        }
+        .tab-active {
+            border-color: #4f46e5; /* indigo-600 */
+            background-color: #ffffff;
+            color: #4f46e5;
+            font-weight: 600;
+        }
+        .tab-inactive {
+            border-color: transparent;
+            color: #57534e; /* stone-600 */
+            background-color: transparent;
+        }
+        .code-block {
+            position: relative;
+            background-color: #292524; /* stone-800 */
+            color: #f5f5f4; /* stone-100 */
+            border-radius: 0.5rem;
+            padding: 1rem;
+            overflow-x: auto;
+        }
+        .code-block pre {
+            white-space: pre;
+            overflow-x: auto;
+        }
+        .copy-btn {
+            position: absolute;
+            top: 0.75rem;
+            right: 0.75rem;
+            background-color: #44403c; /* stone-700 */
+            color: #e7e5e4; /* stone-200 */
+            border: none;
+            padding: 0.25rem 0.5rem;
+            border-radius: 0.375rem;
+            font-size: 0.75rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        .copy-btn:hover {
+            background-color: #57534e; /* stone-600 */
+        }
+        .copy-btn-copied {
+            background-color: #16a34a; /* green-600 */
+            color: white;
+        }
+        /* Custom syntax highlighting */
+        .code-keyword { color: #c084fc; } /* purple-400 */
+        .code-comment { color: #9ca3af; } /* gray-400 */
+        .code-string { color: #a3e635; } /* lime-400 */
+        .code-command { color: #60a5fa; } /* blue-400 */
+    </style>
+</head>
+<body class="bg-stone-100 text-stone-800">
+
+    <!-- Header & Navigation -->
+    <header class="sticky top-0 z-50 bg-white border-b border-stone-200 shadow-sm">
+        <nav class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16">
+                <div class="flex-shrink-0 flex items-center">
+                    <span class="text-2xl font-bold text-indigo-600">🐳</span>
+                    <span class="ml-3 text-xl font-bold text-stone-900">Docker Best Practices</span>
+                </div>
+                <div class="hidden sm:block sm:ml-6">
+                    <div class="flex space-x-4">
+                        <a href="#hero" class="text-stone-600 hover:text-indigo-600 px-3 py-2 rounded-md text-sm font-medium">Home</a>
+                        <a href="#app" class="text-stone-600 hover:text-indigo-600 px-3 py-2 rounded-md text-sm font-medium">The App</a>
+                    </div>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <!-- Hero Section -->
+    <section id="hero" class="bg-white">
+        <div class="max-w-7xl mx-auto py-16 px-4 sm:py-24 sm:px-6 lg:px-8 text-center">
+            <h1 class="text-4xl font-extrabold tracking-tight text-stone-900 sm:text-5xl md:text-6xl">
+                <span class="block">Master Docker Interactively</span>
+            </h1>
+            <p class="mt-6 max-w-lg mx-auto text-xl text-stone-600 sm:max-w-3xl">
+                This guide translates the "Docker Best Practices" report into an interactive app. Explore the three pillars of professional Docker development: Efficiency, Security, and Runtime.
+            </p>
+            <div class="mt-10">
+                <a href="#app" class="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700">
+                    Explore The App
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Main Application -->
+    <main id="app" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+        
+        <!-- Tab Navigation -->
+        <div class="mb-8">
+            <div class="sm:hidden">
+                <label for="tabs" class="sr-only">Select a tab</label>
+                <select id="tabs-select" class="block w-full rounded-md border-stone-300 focus:border-indigo-500 focus:ring-indigo-500">
+                    <option value="efficiency">Efficiency 🏗️</option>
+                    <option value="security">Security 🛡️</option>
+                    <option value="runtime">Runtime 🏃</option>
+                    <option value="cheat-sheet">Cheat Sheet ⚡️</option>
+                </select>
+            </div>
+            <div class="hidden sm:block">
+                <div class="border-b border-stone-300">
+                    <nav class="-mb-px flex space-x-8" aria-label="Tabs" role="tablist">
+                        <button role="tab" aria-selected="true" aria-controls="panel-efficiency" id="tab-efficiency" class="tab-button tab-active whitespace-nowrap py-4 px-1 border-b-2 text-sm">
+                            Efficiency 🏗️
+                        </button>
+                        <button role="tab" aria-selected="false" aria-controls="panel-security" id="tab-security" class="tab-button tab-inactive whitespace-nowrap py-4 px-1 border-b-2 text-sm">
+                            Security 🛡️
+                        </button>
+                        <button role="tab" aria-selected="false" aria-controls="panel-runtime" id="tab-runtime" class="tab-button tab-inactive whitespace-nowrap py-4 px-1 border-b-2 text-sm">
+                            Runtime 🏃
+                        </button>
+                        <button role="tab" aria-selected="false" aria-controls="panel-cheat-sheet" id="tab-cheat-sheet" class="tab-button tab-inactive whitespace-nowrap py-4 px-1 border-b-2 text-sm">
+                            Cheat Sheet ⚡️
+                        </button>
+                    </nav>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tab Panels -->
+        <div>
+            <!-- Panel 1: Efficiency -->
+            <div role="tabpanel" id="panel-efficiency" class="tab-panel space-y-12">
+                <div class="bg-white p-8 rounded-lg shadow-sm border border-stone-200">
+                    <h2 class="text-3xl font-bold text-stone-900 mb-4">1. Efficiency: Building Faster & Smaller</h2>
+                    <p class="text-lg text-stone-600 mb-6">
+                        This section explores how to optimize your build speed using layer caching and dramatically reduce your final image size with multi-stage builds.
+                    </p>
+
+                    <h3 class="text-2xl font-semibold text-stone-900 mt-8 mb-4">The Layer Cake Strategy</h3>
+                    <p class="text-stone-600 mb-6">
+                        Docker caches layers. If a layer changes, **all subsequent layers must be rebuilt**. The key is to order your commands from least-frequently-changed to most-frequently-changed.
+                    </p>
+                    <div class="grid md:grid-cols-2 gap-6">
+                        <div class="rounded-lg border-2 border-red-300 bg-red-50 p-6">
+                            <h4 class="text-lg font-semibold text-red-800 mb-2">❌ Bad: The Slow Way</h4>
+                            <p class="text-red-700 text-sm mb-4">Copying source code first invalidates the cache every time you edit a single file, forcing `npm install` to re-run needlessly.</p>
+                            <div class="font-mono text-xs space-y-1 text-red-900">
+                                <div><span class="font-bold">1.</span> COPY . .</div>
+                                <div><span class="font-bold">2.</span> RUN npm install</div>
+                                <div><span class="font-bold">3.</span> <span class="italic">(Edit app.js)</span></div>
+                                <div><span class="font-bold">4.</span> 💥 <span class="line-through">Cache invalidated</span></div>
+                                <div><span class="font-bold">5.</span> 🐌 Re-run <span class="font-bold">1</span> & <span class="font-bold">2</span></div>
+                            </div>
+                        </div>
+                        <div class="rounded-lg border-2 border-green-300 bg-green-50 p-6">
+                            <h4 class="text-lg font-semibold text-green-800 mb-2">✅ Good: The Fast Way</h4>
+                            <p class="text-green-700 text-sm mb-4">Copying only `package.json` first ensures `npm install` only re-runs when your dependencies *actually* change.</p>
+                             <div class="font-mono text-xs space-y-1 text-green-900">
+                                <div><span class="font-bold">1.</span> COPY package*.json .</div>
+                                <div><span class="font-bold">2.</span> RUN npm install</div>
+                                <div><span class="font-bold">3.</span> COPY . .</div>
+                                <div><span class="font-bold">4.</span> <span class="italic">(Edit app.js)</span></div>
+                                <div><span class="font-bold">5.</span> ✅ <span class="font-bold">1</span> & <span class="font-bold">2</span> are <span class="font-bold">CACHED</span></div>
+                                <div><span class="font-bold">6.</span> 🚀 Only re-run <span class="font-bold">3</span></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <h3 class="text-2xl font-semibold text-stone-900 mt-10 mb-4">Multi-Stage Builds</h3>
+                    <p class="text-stone-600 mb-6">
+                        Don't ship your build tools (compilers, git, dev dependencies) to production. Use a "Builder" stage to create artifacts, and copy *only* what you need to a clean, lightweight "Runner" image. This drastically reduces size and attack surface.
+                    </p>
+                    <div class="code-block" data-lang="dockerfile">
+                        <button class="copy-btn">Copy</button>
+<pre>
+<span class="code-comment"># --- Stage 1: The Builder ---</span>
+<span class="code-keyword">FROM</span> node:18 <span class="code-keyword">AS</span> builder
+<span class="code-command">WORKDIR</span> /app
+
+<span class="code-comment"># 1. Copy dependency definitions first (Cached!)</span>
+<span class="code-command">COPY</span> package*.json .
+
+<span class="code-comment"># 2. Install dependencies (Only runs if package.json changes)</span>
+<span class="code-command">RUN</span> npm install
+
+<span class="code-comment"># 3. Copy source code last</span>
+<span class="code-command">COPY</span> . .
+
+<span class="code-comment"># --- Stage 2: The Production Image ---</span>
+<span class="code-keyword">FROM</span> node:18-slim
+<span class="code-command">WORKDIR</span> /app
+
+<span class="code-comment"># Copy ONLY the node_modules and code from the "builder" stage</span>
+<span class="code-command">COPY</span> --from=builder /app/node_modules ./node_modules
+<span class="code-command">COPY</span> --from=builder /app/index.js .
+
+<span class="code-command">CMD</span> [<span class="code-string">"node"</span>, <span class="code-string">"index.js"</span>]
+</pre>
+                    </div>
+
+                    <h3 class="text-2xl font-semibold text-stone-900 mt-10 mb-4">The `.dockerignore` File</h3>
+                    <p class="text-stone-600 mb-6">
+                        Always include a `.dockerignore` file. This prevents local junk (like your `node_modules` folder, `.git` history, or `.env` files) from being sent to the Docker daemon, speeding up the build and preventing secret leaks.
+                    </p>
+                    <div class="code-block" data-lang="text">
+                        <button class="copy-btn">Copy</button>
+<pre>
+node_modules
+.git
+.env
+npm-debug.log
+</pre>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Panel 2: Security -->
+            <div role="tabpanel" id="panel-security" class="tab-panel hidden space-y-12">
+                <div class="bg-white p-8 rounded-lg shadow-sm border border-stone-200">
+                    <h2 class="text-3xl font-bold text-stone-900 mb-4">2. Security: Locking It Down</h2>
+                    <p class="text-lg text-stone-600 mb-6">
+                        By default, Docker containers run as **root**. This is a major security risk. This section covers how to properly drop privileges and manage ports.
+                    </p>
+
+                    <h3 class="text-2xl font-semibold text-stone-900 mt-8 mb-4">The "Root" Problem & Solution</h3>
+                    <p class="text-stone-600 mb-6">
+                        If an attacker compromises your application and it's running as root, they gain root access inside the container. This makes it easier to "break out" and attack the host machine.
+                    </p>
+                    <div class="rounded-lg bg-stone-50 border border-stone-200 p-6">
+                        <h4 class="text-lg font-semibold text-stone-800 mb-2">✅ The "User" Rule</h4>
+                        <p class="text-stone-600">
+                            The solution is to always create a dedicated, non-root system user for your application and switch to it using the `USER` instruction in your Dockerfile.
+                        </p>
+                    </div>
+
+                    <h3 class="text-2xl font-semibold text-stone-900 mt-10 mb-4">The Port Rule & Mapping</h3>
+                    <p class="text-stone-600 mb-6">
+                        Non-root users cannot bind to "privileged" ports (any port below 1024). This is a good thing! The standard practice is:
+                    </p>
+                    <ul class="list-disc list-inside text-stone-600 space-y-1 mb-6">
+                        <li>Your application listens on a high port (e.g., `3000`) **inside** the container.</li>
+                        <li>Docker maps a privileged port (e.g., `80`) on the **outside** (host) to your application's high port.</li>
+                    </ul>
+                    <div class="bg-stone-50 border border-stone-200 rounded-lg p-6 flex flex-col md:flex-row items-center justify-center space-y-4 md:space-y-0 md:space-x-8">
+                        <div class="text-center">
+                            <div class="text-lg font-semibold">External User</div>
+                            <div class="font-mono text-sm text-indigo-600">Port 80</div>
+                        </div>
+                        <div class="text-3xl text-stone-400">→</div>
+                        <div class="text-center p-4 border-2 border-dashed border-stone-400 rounded-lg">
+                            <div class="text-lg font-semibold">Docker Host</div>
+                            <div class="font-mono text-sm text-stone-700">Map <span class="font-bold text-black">80:3000</span></div>
+                        </div>
+                        <div class="text-3xl text-stone-400">→</div>
+                        <div class="text-center bg-indigo-50 border border-indigo-200 p-4 rounded-lg">
+                            <div class="text-lg font-semibold text-indigo-800">Container</div>
+                            <div class="font-mono text-sm text-indigo-700">Port 3000 (as 'appuser')</div>
+                        </div>
+                    </div>
+
+
+                    <h3 class="text-2xl font-semibold text-stone-900 mt-10 mb-4">Secure Dockerfile Snippet</h3>
+                    <div class="code-block" data-lang="dockerfile">
+                        <button class="copy-btn">Copy</button>
+<pre>
+<span class="code-keyword">FROM</span> node:18-slim
+
+<span class="code-comment"># 1. Create a group and user</span>
+<span class="code-command">RUN</span> groupadd -r appuser && useradd -r -g appuser appuser
+
+<span class="code-command">WORKDIR</span> /app
+<span class="code-command">COPY</span> . .
+
+<span class="code-comment"># 2. Switch context (Drop root privileges)</span>
+<span class="code-command">USER</span> appuser
+
+<span class="code-comment"># 3. Expose high port (internal)</span>
+<span class="code-command">EXPOSE</span> 3000
+
+<span class="code-command">CMD</span> [<span class="code-string">"node"</span>, <span class="code-string">"index.js"</span>]
+</pre>
+                    </div>
+                    <p class="text-stone-600 mt-4 italic">
+                        You would then run this with: `docker run -p 80:3000 my-image`
+                    </p>
+                </div>
+            </div>
+
+            <!-- Panel 3: Runtime -->
+            <div role="tabpanel" id="panel-runtime" class="tab-panel hidden space-y-12">
+                <div class="bg-white p-8 rounded-lg shadow-sm border border-stone-200">
+                    <h2 class="text-3xl font-bold text-stone-900 mb-4">3. Runtime: Philosophy & Orchestration</h2>
+                    <p class="text-lg text-stone-600 mb-6">
+                        This section covers the core philosophy of "One Process Per Container" and how to manage multi-container applications using Docker Compose.
+                    </p>
+
+                    <h3 class="text-2xl font-semibold text-stone-900 mt-8 mb-4">"One Process Per Container"</h3>
+                    <p class="text-stone-600 mb-6">
+                        Never bundle your Database and API in the same container. Why? If the API process crashes but the Database process keeps running, Docker will think the container is still healthy. This creates a "Zombie Container" that serves errors but never restarts.
+                    </p>
+                    <div class="grid md:grid-cols-2 gap-6">
+                        <div class="rounded-lg border-2 border-red-300 bg-red-50 p-6">
+                            <h4 class="text-lg font-semibold text-red-800 mb-2">❌ Bad: The Zombie</h4>
+                            <div class="text-red-700 text-sm mb-4">One container holds both. If the API crashes, the container lives on, serving errors. No self-healing.</div>
+                            <div class="border border-red-300 rounded p-4 text-center">
+                                <span class="font-bold text-red-900">Container</span>
+                                <div class="mt-2 p-2 bg-red-100 rounded">API (Crashed 💀)</div>
+                                <div class="mt-2 p-2 bg-green-100 rounded">DB (Running)</div>
+                            </div>
+                        </div>
+                        <div class="rounded-lg border-2 border-green-300 bg-green-50 p-6">
+                            <h4 class="text-lg font-semibold text-green-800 mb-2">✅ Good: Decoupled</h4>
+                            <p class="text-green-700 text-sm mb-4">Each process gets its own container. If the API container crashes, Docker restarts it. This is self-healing and scalable.</p>
+                             <div class="flex gap-4 text-center">
+                                 <div class="flex-1 border border-green-300 rounded p-4">
+                                     <span class="font-bold text-green-900">Container 1</span>
+                                     <div class="mt-2 p-2 bg-red-100 rounded">API (Crashes 💀)</div>
+                                     <div class="mt-1 text-sm text-green-700">...restarts...</div>
+                                 </div>
+                                 <div class="flex-1 border border-green-300 rounded p-4">
+                                     <span class="font-bold text-green-900">Container 2</span>
+                                     <div class="mt-2 p-2 bg-green-100 rounded">DB (Running)</div>
+                                 </div>
+                             </div>
+                        </div>
+                    </div>
+
+                    <h3 class="text-2xl font-semibold text-stone-900 mt-10 mb-4">Docker Compose</h3>
+                    <p class="text-stone-600 mb-6">
+                        Use `docker-compose.yml` to define your entire multi-container application stack. It handles creating networks, volumes, and startup order (e.g., "wait for DB to start") automatically.
+                    </p>
+                    <div class="code-block" data-lang="yaml">
+                        <button class="copy-btn">Copy</button>
+<pre>
+<span class="code-keyword">version:</span> <span class="code-string">'3.8'</span>
+<span class="code-keyword">services:</span>
+  <span class="code-keyword">api:</span>
+    <span class="code-command">build:</span> .
+    <span class="code-command">ports:</span>
+      - <span class="code-string">"80:3000"</span>        <span class="code-comment"># Map External 80 -> Internal 3000</span>
+    <span class="code-command">depends_on:</span>
+      - db               <span class="code-comment"># Wait for DB to start</span>
+
+  <span class="code-keyword">db:</span>
+    <span class="code-command">image:</span> mongo:latest
+    <span class="code-command">volumes:</span>
+      - mongo-data:/data/db  <span class="code-comment"># Persist data if container dies</span>
+
+<span class="code-keyword">volumes:</span>
+  <span class="code-keyword">mongo-data:</span>
+</pre>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Panel 4: Cheat Sheet -->
+            <div role="tabpanel" id="panel-cheat-sheet" class="tab-panel hidden space-y-12">
+                <div class="bg-white p-8 rounded-lg shadow-sm border border-stone-200">
+                    <h2 class="text-3xl font-bold text-stone-900 mb-6">⚡️ Cheat Sheet</h2>
+                    <p class="text-lg text-stone-600 mb-8">
+                        A quick reference for the most common commands from this guide.
+                    </p>
+                    
+                    <div class="overflow-x-auto">
+                        <table class="min-w-full divide-y divide-stone-200 border border-stone-200 rounded-lg">
+                            <thead class="bg-stone-50">
+                                <tr>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-stone-500 uppercase tracking-wider">Action</th>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-stone-500 uppercase tracking-wider">Command</th>
+                                </tr>
+                            </thead>
+                            <tbody class="bg-white divide-y divide-stone-200">
+                                <tr>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-stone-900">Build Image</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-stone-600 font-mono">docker build -t my-app .</td>
+                                </tr>
+                                <tr>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-stone-900">Run (Secure Port)</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-stone-600 font-mono">docker run -p 80:3000 my-app</td>
+                                </tr>
+                                <tr>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-stone-900">Compose Start (Background)</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-stone-600 font-mono">docker compose up -d</td>
+                                </tr>
+                                <tr>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-stone-900">Compose Logs (Follow)</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-stone-600 font-mono">docker compose logs -f</td>
+                                </tr>
+                                <tr>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-stone-900">Stop & Remove</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-stone-600 font-mono">docker compose down</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const tabs = document.querySelectorAll('.tab-button');
+            const panels = document.querySelectorAll('.tab-panel');
+            const select = document.getElementById('tabs-select');
+
+            function showTab(tabId) {
+                tabs.forEach(tab => {
+                    const isSelected = tab.id === `tab-${tabId}`;
+                    tab.classList.toggle('tab-active', isSelected);
+                    tab.classList.toggle('tab-inactive', !isSelected);
+                    tab.setAttribute('aria-selected', isSelected);
+                });
+
+                panels.forEach(panel => {
+                    panel.classList.toggle('hidden', panel.id !== `panel-${tabId}`);
+                });
+                
+                if (select.value !== tabId) {
+                    select.value = tabId;
+                }
+            }
+
+            tabs.forEach(tab => {
+                tab.addEventListener('click', () => {
+                    const tabId = tab.id.replace('tab-', '');
+                    showTab(tabId);
+                });
+            });
+
+            select.addEventListener('change', (e) => {
+                showTab(e.target.value);
+            });
+
+            // Clipboard functionality
+            document.querySelectorAll('.copy-btn').forEach(button => {
+                button.addEventListener('click', () => {
+                    const codeBlock = button.closest('.code-block');
+                    const code = codeBlock.querySelector('pre').innerText;
+
+                    // Use document.execCommand as per instructions
+                    const textArea = document.createElement('textarea');
+                    textArea.value = code;
+                    document.body.appendChild(textArea);
+                    textArea.select();
+                    try {
+                        document.execCommand('copy');
+                        button.textContent = 'Copied!';
+                        button.classList.add('copy-btn-copied');
+                        setTimeout(() => {
+                            button.textContent = 'Copy';
+                            button.classList.remove('copy-btn-copied');
+                        }, 2000);
+                    } catch (err) {
+                        console.error('Failed to copy text: ', err);
+                        button.textContent = 'Error';
+                    }
+                    document.body.removeChild(textArea);
+                });
+            });
+        });
+    </script>
+
+</body>
+</html>
